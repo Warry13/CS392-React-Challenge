@@ -1,24 +1,44 @@
-import { useState } from 'react'
 // import reactLogo from './assets/react.svg'
 // import viteLogo from '/vite.svg'
+import Banner from "./components/Banner"
+import CourseList from "./components/CourseList"
+
+const schedule = {
+  "title": "CS Courses for 2018-2019",
+  "courses": {
+    "F101" : {
+      "term": "Fall",
+      "number": "101",
+      "meets" : "MWF 11:00-11:50",
+      "title" : "Computer Science: Concepts, Philosophy, and Connections"
+    },
+    "F110" : {
+      "term": "Fall",
+      "number": "110",
+      "meets" : "MWF 10:00-10:50",
+      "title" : "Intro Programming for non-majors"
+    },
+    "S313" : {
+      "term": "Spring",
+      "number": "313",
+      "meets" : "TuTh 15:30-16:50",
+      "title" : "Tangible Interaction Design and Learning"
+    },
+    "S314" : {
+      "term": "Spring",
+      "number": "314",
+      "meets" : "TuTh 9:30-10:50",
+      "title" : "Tech & Human Interaction"
+    }
+  }
+};
 
 const App = () => {
-  const [count, setCount] = useState(0)
-  const schedule = {
-    title: "CS Courses for for 2024-2025"
-  }
 
   return (
-    <div className="text-center">
-      <header className="bg-[#282c34] min-h-screen flex flex-col items-center justify-center text-[calc(10px_+_2vmin)] text-white">
-        <p className="m-4">Class Schedules!</p>
-        <p>{schedule['title']}</p>
-        <p>
-          <button className="bg-blue-400 hover:bg-blue-500 text-white font-bold py-2 px-4 rounded " onClick={() => setCount(count => count + 1)}>
-            count is: {count}
-          </button>
-        </p>
-      </header>
+    <div>
+      <Banner title={schedule.title} />
+      <CourseList courses={schedule.courses} />
     </div>
   )
 }
