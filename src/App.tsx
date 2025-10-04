@@ -1,51 +1,11 @@
 // import reactLogo from './assets/react.svg'
 // import viteLogo from '/vite.svg'
-import React from "react";
+import React, { useMemo, useState } from "react";
 import Banner from "./components/Banner"
 import CourseList from "./components/CourseList"
+import TermSelector from "./components/TermSelector";
+import type { Term } from "./components/TermSelector";
 import { useJsonQuery } from "./utilities/fetch";
-
-// const schedule = {
-//   "title": "CS Courses for 2018-2019",
-//   "courses": {
-//     "F101" : {
-//       "term": "Fall",
-//       "number": "101",
-//       "meets" : "MWF 11:00-11:50",
-//       "title" : "Computer Science: Concepts, Philosophy, and Connections"
-//     },
-//     "F110" : {
-//       "term": "Fall",
-//       "number": "110",
-//       "meets" : "MWF 10:00-10:50",
-//       "title" : "Intro Programming for non-majors"
-//     },
-//     "S313" : {
-//       "term": "Spring",
-//       "number": "313",
-//       "meets" : "TuTh 15:30-16:50",
-//       "title" : "Tangible Interaction Design and Learning"
-//     },
-//     "S314" : {
-//       "term": "Spring",
-//       "number": "314",
-//       "meets" : "TuTh 9:30-10:50",
-//       "title" : "Tech & Human Interaction"
-//     }
-//   }
-// };
-
-// const App = () => {
-
-//   return (
-//     <div>
-//       <Banner title={schedule.title} />
-//       <CourseList courses={schedule.courses} />
-//     </div>
-//   )
-// }
-
-// export default App
 
 interface Course {
   term: string;
@@ -59,8 +19,12 @@ interface Schedule {
   courses: Record<string, Course>;
 }
 
+const fix = (s: string) => s.trim().toLowerCase();
+
 const App: React.FC = () => {
   const [json, isLoading, error] = useJsonQuery("https://courses.cs.northwestern.edu/394/guides/data/cs-courses.php");
+
+  const [selectedTerm, setSelectedTerm] = useState<Term>("Fall");
 
   if (error) return <h1>Error loading schedule: {`${error}`}</h1>;
   if (isLoading) return <h1>Loading schedule...</h1>;
@@ -68,11 +32,25 @@ const App: React.FC = () => {
 
   const schedule = json as Schedule;
 
+  const filteredCourses = useMemo(() => {
+    const want = fix(selectedTerm);
+    return Object.fromEntries(
+      Object.entries(schedule.courses).filter(([, c]) => fix(c.term) === want)
+    );
+  }, [schedule.courses, selectedTerm]);
+
   return (
-    <div>
+    <div className="min-h-screen bg-slate-50">
       <Banner title={schedule.title} />
-      <CourseList courses={schedule.courses} />
+      <div className="mx-auto max-w-7xl px-4 py-6">
+        <TermSelector selected={selectedTerm} onSelect={setSelectedTerm} />
+      </div>
+      <CourseList courses={filteredCourses} />
     </div>
+    // <div>
+    //   <Banner title={schedule.title} />
+    //   <CourseList courses={schedule.courses} />
+    // </div>
   );
 };
 
