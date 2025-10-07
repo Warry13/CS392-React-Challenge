@@ -1,8 +1,8 @@
 // import reactLogo from './assets/react.svg'
 // import viteLogo from '/vite.svg'
 import React, { useMemo, useState } from "react";
-import Banner from "./components/Banner"
-import CourseList from "./components/CourseList"
+import Banner from "./components/Banner";
+import CourseList from "./components/CourseList";
 import TermSelector from "./components/TermSelector";
 import type { Term } from "./components/TermSelector";
 import { useJsonQuery } from "./utilities/fetch";
@@ -25,6 +25,7 @@ const App: React.FC = () => {
   const [json, isLoading, error] = useJsonQuery("https://courses.cs.northwestern.edu/394/guides/data/cs-courses.php");
 
   const [selectedTerm, setSelectedTerm] = useState<Term>("Fall");
+  const [selectedCourses, setSelectedCourses] = useState<string[]>([]);
 
   if (error) return <h1>Error loading schedule: {`${error}`}</h1>;
   if (isLoading) return <h1>Loading schedule...</h1>;
@@ -39,18 +40,20 @@ const App: React.FC = () => {
     );
   }, [schedule.courses, selectedTerm]);
 
+  const toggleSelected = (id: string) => {
+    setSelectedCourses(prev =>
+      prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
+    );
+  };
+
   return (
     <div className="min-h-screen bg-slate-50">
-      <Banner title={schedule.title} />
+      <Banner title={schedule.title}/>
       <div className="mx-auto max-w-7xl px-4 py-6">
-        <TermSelector selected={selectedTerm} onSelect={setSelectedTerm} />
+        <TermSelector selected={selectedTerm} onSelect={setSelectedTerm}/>
       </div>
-      <CourseList courses={filteredCourses} />
+      <CourseList courses={filteredCourses} selected={selectedCourses} onToggle={toggleSelected}/>
     </div>
-    // <div>
-    //   <Banner title={schedule.title} />
-    //   <CourseList courses={schedule.courses} />
-    // </div>
   );
 };
 
