@@ -10,27 +10,41 @@ interface Course {
 export interface CourseCardsProps {
   courses: Record<string, Course>;
   selected: string[];
+  conflicts: string[];
   onToggle: (id: string) => void;
 }
 
-const CourseList: React.FC<CourseCardsProps> = ({ courses, selected, onToggle }) => (
+const CourseList: React.FC<CourseCardsProps> = ({ courses, selected, conflicts, onToggle }) => (
   <section className="min-h-screen bg-slate-50 py-10">
     <div className="mx-auto max-w-7xl px-4">
       <div className="grid gap-6 grid-cols-[repeat(auto-fit,minmax(18rem,1fr))]">
         {Object.entries(courses).map(([id, course]) => {
           const isSelected = selected.includes(id);
+          const isConflict = conflicts.includes(id);
+
+          const base =
+            "rounded-2xl border p-5 shadow-sm transition-all focus-within:shadow-md";
+          const color = isSelected
+            ? "border-green-500 bg-green-100"
+            : isConflict
+            ? "border-red-500 bg-red-100"
+            : "border-slate-200 bg-white";
+          const interactivity = isConflict
+            ? "cursor-not-allowed opacity-75"
+            : "cursor-pointer hover:shadow-md";
+
           return (
             <article
               key={id}
-              role="button"
-              tabIndex={0}
-              onClick={() => onToggle(id)}
-              onKeyDown={(e) => (e.key === "Enter" || e.key === " ") && onToggle(id)}
+              role={isConflict ? undefined : "button"}
+              tabIndex={isConflict ? -1 : 0}
+              onClick={() => !isConflict && onToggle(id)}
+              onKeyDown={(e) => {
+                if (!isConflict && (e.key === "Enter" || e.key === " ")) onToggle(id);
+              }}
               aria-pressed={isSelected}
-              className={`cursor-pointer rounded-2xl border p-5 shadow-sm transition-all
-                ${isSelected
-                  ? "border-green-500 bg-green-100 hover:shadow-lg"
-                  : "border-slate-200 bg-white hover:shadow-md"}`}
+              aria-disabled={isConflict || undefined}
+              className={`${base} ${color} ${interactivity}`}
             >
               <header className="mb-2">
                 <h3 className="text-lg font-semibold text-slate-900">{course.title}</h3>

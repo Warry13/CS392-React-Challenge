@@ -7,6 +7,7 @@ import TermSelector from "./components/TermSelector";
 import type { Term } from "./components/TermSelector";
 import { useJsonQuery } from "./utilities/fetch";
 import SelectedCoursesModal from "./components/PopUp";
+import { computeConflicts } from "./utilities/conflicts";
 
 interface Course {
   term: string;
@@ -28,32 +29,39 @@ const App: React.FC = () => {
   const [selectedCourses, setSelectedCourses] = useState<string[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
 
-  if (error) return <h1>Error loading schedule: {`${error}`}</h1>;
-  if (isLoading) return <h1>Loading schedule...</h1>;
-  if (!json) return <h1>No schedule data found</h1>;
-
-  const schedule = json as Schedule;
+  const schedule = useMemo(() => (json ? (json as Schedule) : null), [json]);
 
   const filteredCourses = useMemo(() => {
     const want = fix(selectedTerm);
-    return Object.fromEntries(
-      Object.entries(schedule.courses).filter(([, c]) => fix(c.term) === want)
-    );
-  }, [schedule.courses, selectedTerm]);
+    const all = schedule?.courses ?? {};
+    return Object.fromEntries(Object.entries(all).filter(([, c]) => fix(c.term) === want));
+  }, [schedule, selectedTerm]);
+
+  const selectedInThisTerm = useMemo(() => {
+    const all = schedule?.courses ?? {};
+    const want = fix(selectedTerm);
+    return selectedCourses.filter((id) => all[id] && fix(all[id].term) === want);
+  }, [selectedCourses, schedule, selectedTerm]);
+
+  const conflicts = useMemo(() => {
+    return computeConflicts(filteredCourses, selectedInThisTerm);
+  }, [filteredCourses, selectedInThisTerm]);
+
+  const selectedItems = useMemo(() => {
+    const all = schedule?.courses ?? {};
+    return selectedCourses.map((id) => ({ id, course: all[id] })).filter((x): x is { id: string; course: Course } => Boolean(x.course));
+  }, [selectedCourses, schedule]);
+
+  if (error) return <h1>Error loading schedule: {`${error}`}</h1>;
+  if (isLoading) return <h1>Loading schedule...</h1>;
+  if (!schedule) return <h1>No schedule data found</h1>;
 
   const toggleSelected = (id: string) => {
+    if (conflicts.has(id)) return;
     setSelectedCourses((prev) =>
       prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]
     );
   };
-
-  const selectedItems = useMemo(
-    () =>
-      selectedCourses
-        .map((id) => ({ id, course: schedule.courses[id] }))
-        .filter((x): x is { id: string; course: Course } => Boolean(x.course)),
-    [selectedCourses, schedule.courses]
-  );
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -72,7 +80,8 @@ const App: React.FC = () => {
 
       <CourseList
         courses={filteredCourses}
-        selected={selectedCourses}
+        selected={selectedInThisTerm}
+        conflicts={[...conflicts]}
         onToggle={toggleSelected}
       />
 
