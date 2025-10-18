@@ -5,7 +5,7 @@ import Banner from "./components/Banner";
 import CourseList from "./components/CourseList";
 import TermSelector from "./components/TermSelector";
 import type { Term } from "./components/TermSelector";
-import { useJsonQuery } from "./utilities/fetch";
+import { useDbData } from "./utilities/firebase";
 import SelectedCoursesModal from "./components/PopUp";
 import { computeConflicts } from "./utilities/conflicts";
 
@@ -23,7 +23,7 @@ interface Schedule {
 const fix = (s: string) => s.trim().toLowerCase();
 
 const App: React.FC = () => {
-  const [json, isLoading, error] = useJsonQuery("https://courses.cs.northwestern.edu/394/guides/data/cs-courses.php");
+  const [json, isLoading, error] = useDbData<Schedule>("/schedule");
 
   const [selectedTerm, setSelectedTerm] = useState<Term>("Fall");
   const [selectedCourses, setSelectedCourses] = useState<string[]>([]);
