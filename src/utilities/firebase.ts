@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase/app';
-import { getDatabase, ref, onValue } from 'firebase/database';
+import { getDatabase, ref, onValue, update } from 'firebase/database';
 import { useEffect, useState } from 'react';
 
 const firebaseConfig = {
@@ -39,6 +39,11 @@ export function useDbData<T = unknown>(path: string): [T | undefined, boolean, E
   }, [path]);
 
   return [data, loading, error];
+}
+
+export async function updateDbData(path: string, value: any): Promise<void> {
+  const dbRef = ref(database, path);
+  await update(dbRef, value);
 }
 
 export { app, database };

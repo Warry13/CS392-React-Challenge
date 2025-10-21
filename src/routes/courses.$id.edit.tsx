@@ -1,6 +1,6 @@
 import * as React from 'react'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
-import { useJsonQuery } from '../utilities/fetch'
+import { useDbData, updateDbData } from '../utilities/firebase'
 
 interface Course {
   term: string;
@@ -98,7 +98,7 @@ export const Route = createFileRoute('/courses/$id/edit')({
 function EditCoursePage() {
   const { id } = Route.useParams()
   const navigate = useNavigate()
-  const [json, isLoading, error] = useJsonQuery('https://courses.cs.northwestern.edu/394/guides/data/cs-courses.php')
+  const [json, isLoading, error] = useDbData<Schedule>('/schedule')
   const schedule = (json as Schedule) ?? null
   const course = schedule?.courses?.[id]
   const [title, setTitle]   = React.useState<string>('')
@@ -119,8 +119,14 @@ function EditCoursePage() {
     }
   }, [course])
 
-  function onSubmit(_values: CourseForm) {
-    // intentionally empty for now
+  async function onSubmit(values: CourseForm) {
+    try {
+      await updateDbData(`/schedule/courses/${id}`, values);
+      navigate({ to: '/' });
+    } catch (err) {
+      console.error('Failed to update course:', err);
+      alert('Failed to save changes. Please try again.');
+    }
   }
 
   function handleSubmit(e: React.FormEvent) {
