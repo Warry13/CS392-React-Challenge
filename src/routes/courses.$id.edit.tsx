@@ -1,6 +1,7 @@
 import * as React from 'react'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { useDbData, updateDbData } from '../utilities/firebase'
+import { useAuth } from '../utilities/AuthProvider'
 
 interface Course {
   term: string;
@@ -138,10 +139,23 @@ function EditCoursePage() {
       onSubmit(result.values)
     }
   }
+  const { isAuthenticated, isInitialLoading } = useAuth()
 
   if (error) return <main className="p-6">Error: {`${error}`}</main>
-  if (isLoading) return <main className="p-6">Loading…</main>
+  if (isLoading || isInitialLoading) return <main className="p-6">Loading…</main>
   if (!schedule) return <main className="p-6">No data.</main>
+  if (!isAuthenticated) {
+    return (
+      <main className="mx-auto max-w-2xl p-6">
+        <h1 className="text-xl font-semibold">Sign in required</h1>
+        <p className="mt-2 text-slate-600">You must be signed in with Google to edit courses.</p>
+        <div className="mt-4">
+          <button onClick={() => navigate({ to: '/' })} className="rounded-lg bg-slate-800 px-4 py-2 text-white">Back</button>
+        </div>
+      </main>
+    )
+  }
+
   if (!course) {
     return (
       <main className="mx-auto max-w-2xl p-6">
