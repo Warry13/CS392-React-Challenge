@@ -22,7 +22,8 @@ const CourseList: React.FC<CourseCardsProps> = ({
   conflicts,
   onToggle,
 }) => {
-  const { isAuthenticated } = useAuth();
+  const { user, isAuthenticated } = useAuth();
+  const ALLOWED_UID = 'slZj4QdR68dBoybS1Szc0OC6AXH3'
 
   return (
   <section className="min-h-screen bg-slate-50 py-10">
@@ -62,7 +63,7 @@ const CourseList: React.FC<CourseCardsProps> = ({
                   <h3 className="text-lg font-semibold text-slate-900">{course.title}</h3>
                   <p className="mt-1 text-sm text-slate-600">{course.meets}</p>
                 </div>
-                {isAuthenticated && (
+                {isAuthenticated && user?.uid === ALLOWED_UID && (
                   <Link
                     to="/courses/$id/edit"
                     params={{ id }}

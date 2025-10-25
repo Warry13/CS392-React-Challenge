@@ -107,6 +107,8 @@ function EditCoursePage() {
   const [number, setNumber] = React.useState<string>('')
   const [meets, setMeets]   = React.useState<string>('')
   const [errors, setErrors] = React.useState<ValidationErrors>({})
+  const { user, isAuthenticated, isInitialLoading } = useAuth()
+  const ALLOWED_UID = 'slZj4QdR68dBoybS1Szc0OC6AXH3'
 
   React.useEffect(() => {
     if (course) {
@@ -122,6 +124,10 @@ function EditCoursePage() {
 
   async function onSubmit(values: CourseForm) {
     try {
+      if (!user || user.uid !== ALLOWED_UID) {
+        alert('You are not authorized to perform this action.');
+        return;
+      }
       await updateDbData(`/schedule/courses/${id}`, values);
       navigate({ to: '/' });
     } catch (err) {
@@ -139,16 +145,17 @@ function EditCoursePage() {
       onSubmit(result.values)
     }
   }
-  const { isAuthenticated, isInitialLoading } = useAuth()
+  
 
   if (error) return <main className="p-6">Error: {`${error}`}</main>
   if (isLoading || isInitialLoading) return <main className="p-6">Loading…</main>
   if (!schedule) return <main className="p-6">No data.</main>
-  if (!isAuthenticated) {
+
+  if (!isAuthenticated || user?.uid !== ALLOWED_UID) {
     return (
       <main className="mx-auto max-w-2xl p-6">
-        <h1 className="text-xl font-semibold">Sign in required</h1>
-        <p className="mt-2 text-slate-600">You must be signed in with Google to edit courses.</p>
+        <h1 className="text-xl font-semibold">Unauthorized</h1>
+        <p className="mt-2 text-slate-600">You must be signed in with the authorized Google account to edit courses.</p>
         <div className="mt-4">
           <button onClick={() => navigate({ to: '/' })} className="rounded-lg bg-slate-800 px-4 py-2 text-white">Back</button>
         </div>
