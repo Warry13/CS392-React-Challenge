@@ -19,6 +19,7 @@ const TermSelector: React.FC<TermSelectorProps> = ({ selected, onSelect }) => {
             key={t}
             type="button"
             onClick={() => onSelect(t)}
+            data-cy={t}
             className={["px-4 py-2 text-sm font-medium rounded-lg transition", isActive ? "bg-indigo-600 text-white shadow" : "text-slate-700 hover:bg-slate-100"].join(" ")}aria-pressed={isActive}
           >
             {t}
