@@ -47,6 +47,7 @@ const CourseList: React.FC<CourseCardsProps> = ({
           return (
             <article
               key={id}
+              data-cy="course"
               className={`${base} ${color} ${interactivity}`}
               role={isConflict ? undefined : "button"}
               tabIndex={isConflict ? -1 : 0}

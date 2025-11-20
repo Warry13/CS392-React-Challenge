@@ -1,8 +1,8 @@
 import { initializeApp } from 'firebase/app';
-import { getDatabase, ref, onValue, update } from 'firebase/database';
+import { getDatabase, ref, onValue, update, connectDatabaseEmulator } from 'firebase/database';
 import { useEffect, useState } from 'react';
 import { flushSync } from 'react-dom'
-import { getAuth, GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signOut, type NextOrObserver, type User} from 'firebase/auth';
+import { getAuth, GoogleAuthProvider, onAuthStateChanged, signInWithPopup, signOut, connectAuthEmulator, type NextOrObserver, type User} from 'firebase/auth';
 
 const firebaseConfig = {
   apiKey: "AIzaSyBVewfypqAMfm0H8uUjCB4dEse2jho_qXQ",
@@ -16,6 +16,13 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 const database = getDatabase(app);
+const auth = getAuth(app);
+
+// Connect to emulators in development mode
+if (import.meta.env.DEV) {
+  connectDatabaseEmulator(database, 'localhost', 9000);
+  connectAuthEmulator(auth, 'http://localhost:9099', { disableWarnings: true });
+}
 
 export function useDbData<T = unknown>(path: string): [T | undefined, boolean, Error | null] {
   const [data, setData] = useState<T | undefined>();
@@ -49,8 +56,6 @@ export async function updateDbData(path: string, value: any): Promise<void> {
 }
 
 export { app, database };
-
-const auth = getAuth(app);
 
 export const signInWithGoogle = () => {
   signInWithPopup(auth, new GoogleAuthProvider());

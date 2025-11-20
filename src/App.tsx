@@ -52,9 +52,9 @@ const App: React.FC = () => {
     return selectedCourses.map((id) => ({ id, course: all[id] })).filter((x): x is { id: string; course: Course } => Boolean(x.course));
   }, [selectedCourses, schedule]);
 
-  if (error) return <h1>Error loading schedule: {`${error}`}</h1>;
-  if (isLoading) return <h1>Loading schedule...</h1>;
-  if (!schedule) return <h1>No schedule data found</h1>;
+  if (error) return <h1 data-cy="error">Error loading schedule: {`${error}`}</h1>;
+  if (isLoading) return <h1 data-cy="loading">Loading schedule...</h1>;
+  if (!schedule) return <h1 data-cy="no-data">No schedule data found</h1>;
 
   const toggleSelected = (id: string) => {
     if (conflicts.has(id)) return;
